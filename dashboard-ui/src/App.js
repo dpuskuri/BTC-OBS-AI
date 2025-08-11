@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import Chart from 'react-apexcharts';
 
 function App() {
   const [spikes, setSpikes] = useState([]);
@@ -20,3 +19,4 @@ function App() {
 }
 
 export default App;
+
