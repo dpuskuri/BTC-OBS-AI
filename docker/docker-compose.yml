@@ -5,8 +5,8 @@ services:
       context: ../data-service
       dockerfile: ../data-service/Dockerfile
     environment:
-      - BINANCE_API=your_api_key_here
-      - BINANCE_SECRET=your_api_secret_here
+      - BINANCE_API=SLcR7bnIfciyge3IgXt5d7c7SCGZIwgYT47fj9ZdeU5JkBKWqSGJPPedUlrQjQ42
+      - BINANCE_SECRET=QpHj2ItOQU0CyF8bq21nZUDlh2YYjtRoBMKxl5aJPTST5NcrowbTnyZyKR8Su7hm
     ports:
       - "5001:5001"
 
