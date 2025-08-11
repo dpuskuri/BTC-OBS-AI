@@ -1,24 +1,13 @@
-from flask import Flask, request, jsonify
-import pandas as pd
-import numpy as np
+from flask import Flask, jsonify
+import requests
 
 app = Flask(__name__)
 
-def detect_spikes(data):
-    df = pd.DataFrame(data)
-    df['volume'] = pd.to_numeric(df['volume'], errors='coerce')
-    zscores = np.abs((df['volume'] - df['volume'].mean()) / df['volume'].std())
-    spikes = df[zscores > 2]
-    return spikes.to_dict(orient="records")
-
-@app.route('/analyze', methods=['POST'])
-def analyze():
-    try:
-        data = request.get_json()
-        spikes = detect_spikes(data)
-        return jsonify({"spikes": spikes})
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+@app.route('/dashboard-data')
+def dashboard_data():
+    raw = requests.get('http://data-service:5001/data').json()
+    spikes = requests.post('http://analytics-service:5002/analyze', json=raw).json()
+    return jsonify({"raw": raw, "spikes": spikes})
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5002)
+    app.run(host='0.0.0.0', port=5000)
