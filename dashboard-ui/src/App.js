@@ -6,16 +6,15 @@ function App() {
   const [spikes, setSpikes] = useState([]);
 
   useEffect(() => {
-    axios.get('/dashboard-data')
-      .then(res => setSpikes(res.data.spikes));
+    axios.get('http://localhost:5000/dashboard-data')
+      .then(res => setSpikes(res.data.spikes.spikes))
+      .catch(err => console.error(err));
   }, []);
 
   return (
-    <div>
-      <h1>BTC Volume Spikes</h1>
-      {/* render spikes using your chart lib */}
-      {/* Example: <Chart options={...} series={...} /> */}
-      {/* ... */}
+    <div style={{ padding: "20px" }}>
+      <h1>BTC Volume Spike Dashboard</h1>
+      <pre>{JSON.stringify(spikes, null, 2)}</pre>
     </div>
   );
 }
