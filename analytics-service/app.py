@@ -1,20 +1,30 @@
-from flask import Flask, request, jsonify
-import numpy as np
+from flask import Flask, jsonify
+import requests
 import pandas as pd
 
 app = Flask(__name__)
 
-def detect_spikes(data):
-    df = pd.DataFrame(data)
-    zscores = np.abs((df['volume'] - df['volume'].mean()) / df['volume'].std())
-    spikes = df[zscores > 2]
-    return spikes.to_dict()
+BINANCE_URL = "https://api.binance.com/api/v3/klines"
 
-@app.route('/analyze', methods=['POST'])
-def analyze():
-    data = request.json
-    spikes = detect_spikes(data)
-    return jsonify(spikes)
+@app.route('/data')
+def get_data():
+    params = {
+        "symbol": "BTCUSDT",
+        "interval": "1h",
+        "limit": 500
+    }
+    raw = requests.get(BINANCE_URL, params=params).json()
+
+    df = pd.DataFrame(raw, columns=[
+        'open_time', 'open', 'high', 'low', 'close', 'volume',
+        'close_time', 'quote_asset_volume', 'num_trades',
+        'taker_buy_base_asset_volume', 'taker_buy_quote_asset_volume', 'ignore'
+    ])
+    # Return only essential columns
+    df_result = df[['open_time', 'open', 'high', 'low', 'close', 'volume']]
+
+    return jsonify(df_result.to_dict(orient="records"))
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5002)
+    app.run(host='0.0.0.0', port=5001)
+
