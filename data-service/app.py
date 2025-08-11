@@ -1,26 +1,30 @@
 from flask import Flask, jsonify
-import requests
+from binance.client import Client
+import os
 import pandas as pd
 
 app = Flask(__name__)
 
-BINANCE_URL = "https://api.binance.com/api/v3/klines"
+# Load Binance API Key/Secret from environment variables (security best practice)
+BINANCE_API_KEY = os.environ.get("BINANCE_API")
+BINANCE_API_SECRET = os.environ.get("BINANCE_SECRET")
+
+# Initialize Binance Client
+client = Client(api_key=BINANCE_API_KEY, api_secret=BINANCE_API_SECRET)
 
 @app.route('/data')
 def get_data():
-    params = {
-        "symbol": "BTCUSDT",
-        "interval": "1h",
-        "limit": 500
-    }
-    raw = requests.get(BINANCE_URL, params=params).json()
+    # Fetch last 500 hourly candles for BTC/USDT
+    klines = client.get_klines(symbol='BTCUSDT', interval=Client.KLINE_INTERVAL_1HOUR, limit=500)
 
-    df = pd.DataFrame(raw, columns=[
+    # Convert to DataFrame with readable column names
+    df = pd.DataFrame(klines, columns=[
         'open_time', 'open', 'high', 'low', 'close', 'volume',
         'close_time', 'quote_asset_volume', 'num_trades',
         'taker_buy_base_asset_volume', 'taker_buy_quote_asset_volume', 'ignore'
     ])
-    # Return only essential columns
+
+    # Only keep essential fields
     df_result = df[['open_time', 'open', 'high', 'low', 'close', 'volume']]
 
     return jsonify(df_result.to_dict(orient="records"))
